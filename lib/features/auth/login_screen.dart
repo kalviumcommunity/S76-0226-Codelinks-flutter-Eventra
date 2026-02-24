@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../shared/widgets/custom_button.dart';
 import '../../shared/widgets/custom_textfield.dart';
+import '../../core/models/user_model.dart';
+import '../../core/services/auth_service.dart';
 import 'signup_screen.dart';
 import '../events/main_navigation_screen.dart';
 
@@ -14,9 +16,14 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  UserRole _selectedRole = UserRole.student;
 
   void _login() {
-    // TODO: Replace login logic with FirebaseAuth
+    AuthService.instance.login(
+      email: _emailController.text,
+      password: _passwordController.text,
+      role: _selectedRole,
+    );
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (context) => const MainNavigationScreen()),
@@ -36,7 +43,7 @@ class _LoginScreenState extends State<LoginScreen> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Theme.of(context).primaryColor.withOpacity(0.1),
+                  color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Icon(
@@ -78,6 +85,35 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
               const SizedBox(height: 32),
+              const Text(
+                'Login as',
+                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: _LoginRoleChip(
+                      label: 'Student',
+                      icon: Icons.school_outlined,
+                      isSelected: _selectedRole == UserRole.student,
+                      onTap: () =>
+                          setState(() => _selectedRole = UserRole.student),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _LoginRoleChip(
+                      label: 'Admin',
+                      icon: Icons.admin_panel_settings_outlined,
+                      isSelected: _selectedRole == UserRole.admin,
+                      onTap: () =>
+                          setState(() => _selectedRole = UserRole.admin),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 32),
               CustomButton(text: 'Login', onPressed: _login),
               const SizedBox(height: 24),
               Row(
@@ -99,6 +135,60 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _LoginRoleChip extends StatelessWidget {
+  final String label;
+  final IconData icon;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  const _LoginRoleChip({
+    required this.label,
+    required this.icon,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? theme.primaryColor.withValues(alpha: 0.1)
+              : Colors.grey[100],
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: isSelected ? theme.primaryColor : Colors.grey[300]!,
+            width: 2,
+          ),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              icon,
+              color: isSelected ? theme.primaryColor : Colors.grey,
+              size: 22,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              label,
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: isSelected ? theme.primaryColor : Colors.grey[600],
+              ),
+            ),
+          ],
         ),
       ),
     );

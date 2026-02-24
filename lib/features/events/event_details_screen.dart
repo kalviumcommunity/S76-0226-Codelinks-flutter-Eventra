@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../core/models/event_model.dart';
+import '../../core/services/auth_service.dart';
 import '../../shared/widgets/custom_button.dart';
 import 'attendees_screen.dart';
 import 'package:intl/intl.dart';
@@ -11,8 +12,8 @@ class EventDetailsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // TODO: Get current user role
-    bool isAdmin = true;
+    // Role from AuthService
+    final bool isAdmin = AuthService.instance.isAdmin;
 
     return Scaffold(
       body: CustomScrollView(
@@ -171,7 +172,7 @@ class _InfoTile extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
-            color: Colors.indigo.withOpacity(0.05),
+            color: Colors.indigo.withValues(alpha: 0.05),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Icon(icon, color: Colors.indigo, size: 24),

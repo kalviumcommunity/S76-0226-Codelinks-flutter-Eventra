@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import '../../core/services/auth_service.dart';
 
 class AnnouncementsScreen extends StatefulWidget {
   const AnnouncementsScreen({super.key});
@@ -56,7 +57,7 @@ class _AnnouncementsScreenState extends State<AnnouncementsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    bool isAdmin = true;
+    final bool isAdmin = AuthService.instance.isAdmin;
 
     return Scaffold(
       appBar: AppBar(title: const Text('Announcements')),

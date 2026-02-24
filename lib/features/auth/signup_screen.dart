@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../../shared/widgets/custom_button.dart';
 import '../../shared/widgets/custom_textfield.dart';
 import '../../core/models/user_model.dart';
+import '../../core/services/auth_service.dart';
+import '../events/main_navigation_screen.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -17,8 +19,17 @@ class _SignupScreenState extends State<SignupScreen> {
   UserRole _selectedRole = UserRole.student;
 
   void _signup() {
-    // TODO: Replace signup logic with FirebaseAuth
-    Navigator.pop(context);
+    AuthService.instance.signup(
+      name: _nameController.text,
+      email: _emailController.text,
+      password: _passwordController.text,
+      role: _selectedRole,
+    );
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (context) => const MainNavigationScreen()),
+      (route) => false,
+    );
   }
 
   @override
@@ -119,7 +130,7 @@ class _RoleCard extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: isSelected
-              ? theme.primaryColor.withOpacity(0.1)
+              ? theme.primaryColor.withValues(alpha: 0.1)
               : Colors.white,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(

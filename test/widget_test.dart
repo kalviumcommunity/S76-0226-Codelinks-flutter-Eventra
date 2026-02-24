@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:eventra/main.dart';
+import 'package:first_app/main.dart';
 
 void main() {
   testWidgets('Splash screen smoke test', (WidgetTester tester) async {

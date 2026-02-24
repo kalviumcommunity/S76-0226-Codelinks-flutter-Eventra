@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import '../../core/services/auth_service.dart';
 import 'events_dashboard.dart';
 import '../announcements/announcements_screen.dart';
 import '../profile/profile_screen.dart';
+import '../admin/admin_dashboard.dart';
 
 class MainNavigationScreen extends StatefulWidget {
   const MainNavigationScreen({super.key});
@@ -13,11 +15,61 @@ class MainNavigationScreen extends StatefulWidget {
 class _MainNavigationScreenState extends State<MainNavigationScreen> {
   int _selectedIndex = 0;
 
-  final List<Widget> _screens = [
-    const EventsDashboard(),
-    const AnnouncementsScreen(),
-    const ProfileScreen(),
-  ];
+  bool get _isAdmin => AuthService.instance.isAdmin;
+
+  List<Widget> get _screens => _isAdmin
+      ? [
+          const AdminDashboard(),
+          const EventsDashboard(),
+          const AnnouncementsScreen(),
+          const ProfileScreen(),
+        ]
+      : [
+          const EventsDashboard(),
+          const AnnouncementsScreen(),
+          const ProfileScreen(),
+        ];
+
+  List<BottomNavigationBarItem> get _navItems => _isAdmin
+      ? const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.dashboard_outlined),
+            activeIcon: Icon(Icons.dashboard),
+            label: 'Dashboard',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.event_outlined),
+            activeIcon: Icon(Icons.event),
+            label: 'Events',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.campaign_outlined),
+            activeIcon: Icon(Icons.campaign),
+            label: 'Announce',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person_outline_rounded),
+            activeIcon: Icon(Icons.person_rounded),
+            label: 'Profile',
+          ),
+        ]
+      : const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.event_outlined),
+            activeIcon: Icon(Icons.event),
+            label: 'Events',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.notifications_none_rounded),
+            activeIcon: Icon(Icons.notifications_rounded),
+            label: 'Announcements',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person_outline_rounded),
+            activeIcon: Icon(Icons.person_rounded),
+            label: 'Profile',
+          ),
+        ];
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +79,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         decoration: BoxDecoration(
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: Colors.black.withValues(alpha: 0.05),
               blurRadius: 20,
               offset: const Offset(0, -5),
             ),
@@ -43,23 +95,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
           type: BottomNavigationBarType.fixed,
           backgroundColor: Colors.white,
           elevation: 0,
-          items: const [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.event_outlined),
-              activeIcon: Icon(Icons.event),
-              label: 'Events',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.notifications_none_rounded),
-              activeIcon: Icon(Icons.notifications_rounded),
-              label: 'Announcements',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.person_outline_rounded),
-              activeIcon: Icon(Icons.person_rounded),
-              label: 'Profile',
-            ),
-          ],
+          items: _navItems,
         ),
       ),
     );

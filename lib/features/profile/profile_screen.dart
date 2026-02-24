@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../core/services/auth_service.dart';
 import '../auth/login_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
@@ -6,33 +7,63 @@ class ProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final user = AuthService.instance.currentUser;
+    final isAdmin = AuthService.instance.isAdmin;
+    final roleName = isAdmin ? 'Admin' : 'Student';
+    final avatarId = isAdmin ? '12' : '33';
+
     return Scaffold(
       appBar: AppBar(title: const Text('Profile')),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
         child: Column(
           children: [
-            const CircleAvatar(
+            CircleAvatar(
               radius: 60,
-              backgroundImage: NetworkImage('https://i.pravatar.cc/300?img=12'),
+              backgroundImage:
+                  NetworkImage('https://i.pravatar.cc/300?img=$avatarId'),
             ),
             const SizedBox(height: 24),
-            const Text(
-              'John Doe',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
             Text(
-              'Admin User',
-              style: TextStyle(
-                color: Theme.of(context).primaryColor,
-                fontWeight: FontWeight.w600,
+              user?.name ?? 'User',
+              style:
+                  const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 6),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+              decoration: BoxDecoration(
+                color: isAdmin
+                    ? Colors.indigo.withValues(alpha: 0.1)
+                    : Colors.green.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    isAdmin
+                        ? Icons.admin_panel_settings
+                        : Icons.school,
+                    size: 16,
+                    color: isAdmin ? Colors.indigo : Colors.green,
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    '$roleName User',
+                    style: TextStyle(
+                      color: isAdmin ? Colors.indigo : Colors.green,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
               ),
             ),
             const SizedBox(height: 32),
-            const _ProfileTile(
+            _ProfileTile(
               icon: Icons.email_outlined,
               title: 'Email',
-              value: 'john.doe@college.edu',
+              value: user?.email ?? 'user@college.edu',
             ),
             const _ProfileTile(
               icon: Icons.school_outlined,
@@ -47,6 +78,7 @@ class ProfileScreen extends StatelessWidget {
             const SizedBox(height: 48),
             ListTile(
               onTap: () {
+                AuthService.instance.logout();
                 Navigator.pushAndRemoveUntil(
                   context,
                   MaterialPageRoute(builder: (context) => const LoginScreen()),
@@ -64,7 +96,7 @@ class ProfileScreen extends StatelessWidget {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),
               ),
-              tileColor: Colors.red.withOpacity(0.05),
+              tileColor: Colors.red.withValues(alpha: 0.05),
             ),
           ],
         ),
@@ -93,7 +125,7 @@ class _ProfileTile extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.02),
+            color: Colors.black.withValues(alpha: 0.02),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),

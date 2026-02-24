@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../core/models/event_model.dart';
+import '../../core/services/auth_service.dart';
 import '../../shared/widgets/event_card.dart';
 import 'event_details_screen.dart';
 import 'create_event_screen.dart';
@@ -69,8 +70,8 @@ class _EventsDashboardState extends State<EventsDashboard> {
 
   @override
   Widget build(BuildContext context) {
-    // TODO: Determine if user is admin (mocking as true for now to show FAB)
-    bool isAdmin = true;
+    // Role from AuthService
+    final bool isAdmin = AuthService.instance.isAdmin;
 
     return Scaffold(
       appBar: AppBar(
