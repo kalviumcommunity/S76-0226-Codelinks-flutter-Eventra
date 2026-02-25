@@ -172,7 +172,7 @@ class _InfoTile extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
-            color: Colors.indigo.withValues(alpha: 0.05),
+            color: Colors.indigo.withOpacity(0.05),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Icon(icon, color: Colors.indigo, size: 24),

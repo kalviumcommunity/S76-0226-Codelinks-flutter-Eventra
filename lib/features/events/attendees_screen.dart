@@ -33,7 +33,7 @@ class _AttendeesScreenState extends State<AttendeesScreen> {
             margin: const EdgeInsets.only(bottom: 12),
             child: ListTile(
               leading: CircleAvatar(
-                backgroundColor: Colors.indigo.withValues(alpha: 0.1),
+                backgroundColor: Colors.indigo.withOpacity(0.1),
                 child: Text(
                   attendee['name']![0],
                   style: const TextStyle(fontWeight: FontWeight.bold),

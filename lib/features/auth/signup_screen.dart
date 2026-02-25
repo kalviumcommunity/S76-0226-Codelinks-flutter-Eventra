@@ -4,6 +4,7 @@ import '../../shared/widgets/custom_textfield.dart';
 import '../../core/models/user_model.dart';
 import '../../core/services/auth_service.dart';
 import '../events/main_navigation_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -17,19 +18,80 @@ class _SignupScreenState extends State<SignupScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   UserRole _selectedRole = UserRole.student;
+  bool _isLoading = false;
 
-  void _signup() {
-    AuthService.instance.signup(
-      name: _nameController.text,
-      email: _emailController.text,
-      password: _passwordController.text,
-      role: _selectedRole,
-    );
-    Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(builder: (context) => const MainNavigationScreen()),
-      (route) => false,
-    );
+  Future<void> _signup() async {
+    final email = _emailController.text.trim();
+    final password = _passwordController.text.trim();
+    final name = _nameController.text.trim();
+
+    if (email.isEmpty || password.isEmpty || name.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please fill all fields')),
+      );
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      // Create user using Firebase Auth
+      UserCredential userCredential = await FirebaseAuth.instance
+          .createUserWithEmailAndPassword(email: email, password: password);
+
+      // Update the display name
+      await userCredential.user?.updateDisplayName(name);
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Account created successfully!')),
+      );
+
+      // Call AuthService to align with buddy's state management
+      AuthService.instance.signup(
+        name: name,
+        email: email,
+        password: password,
+        role: _selectedRole,
+      );
+
+      if (!mounted) return;
+      // Navigate to the dashboard based on role
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => const MainNavigationScreen()),
+        (route) => false,
+      );
+    } on FirebaseAuthException catch (e) {
+      String message = 'An error occurred';
+      if (e.code == 'weak-password') {
+        message = 'The password provided is too weak.';
+      } else if (e.code == 'email-already-in-use') {
+        message = 'An account already exists for that email.';
+      } else if (e.code == 'invalid-email') {
+        message = 'The email address is invalid.';
+      } else {
+        message = e.message ?? message;
+      }
+      
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(message)),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.toString())),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
   }
 
   @override
@@ -99,7 +161,9 @@ class _SignupScreenState extends State<SignupScreen> {
               ],
             ),
             const SizedBox(height: 40),
-            CustomButton(text: 'Sign Up', onPressed: _signup),
+            _isLoading 
+              ? const Center(child: CircularProgressIndicator()) 
+              : CustomButton(text: 'Sign Up', onPressed: _signup),
           ],
         ),
       ),
@@ -130,7 +194,7 @@ class _RoleCard extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: isSelected
-              ? theme.primaryColor.withValues(alpha: 0.1)
+              ? theme.primaryColor.withOpacity(0.1)
               : Colors.white,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(

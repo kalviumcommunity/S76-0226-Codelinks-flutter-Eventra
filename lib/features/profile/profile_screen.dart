@@ -34,8 +34,8 @@ class ProfileScreen extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
               decoration: BoxDecoration(
                 color: isAdmin
-                    ? Colors.indigo.withValues(alpha: 0.1)
-                    : Colors.green.withValues(alpha: 0.1),
+                    ? Colors.indigo.withOpacity(0.1)
+                    : Colors.green.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Row(
@@ -96,7 +96,7 @@ class ProfileScreen extends StatelessWidget {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),
               ),
-              tileColor: Colors.red.withValues(alpha: 0.05),
+              tileColor: Colors.red.withOpacity(0.05),
             ),
           ],
         ),
@@ -125,7 +125,7 @@ class _ProfileTile extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.02),
+            color: Colors.black.withOpacity(0.02),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
