@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../core/services/auth_service.dart';
+import '../../core/services/event_service.dart';
+import '../../core/services/announcement_service.dart';
 import '../events/create_event_screen.dart';
 import '../announcements/announcements_screen.dart';
 
@@ -9,6 +11,8 @@ class AdminDashboard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final user = AuthService.instance.currentUser;
+    final eventService = EventService.instance;
+    final announcementService = AnnouncementService.instance;
 
     return Scaffold(
       appBar: AppBar(
@@ -111,7 +115,7 @@ class AdminDashboard extends StatelessWidget {
                   child: _StatCard(
                     icon: Icons.event,
                     label: 'Total Events',
-                    value: '3',
+                    value: '${eventService.totalEvents}',
                     color: Colors.indigo,
                   ),
                 ),
@@ -120,7 +124,7 @@ class AdminDashboard extends StatelessWidget {
                   child: _StatCard(
                     icon: Icons.people,
                     label: 'Registrations',
-                    value: '285',
+                    value: '${eventService.totalRegistrations}',
                     color: Colors.teal,
                   ),
                 ),
@@ -133,7 +137,7 @@ class AdminDashboard extends StatelessWidget {
                   child: _StatCard(
                     icon: Icons.upcoming,
                     label: 'Upcoming',
-                    value: '2',
+                    value: '${eventService.upcomingCount}',
                     color: Colors.orange,
                   ),
                 ),
@@ -142,7 +146,7 @@ class AdminDashboard extends StatelessWidget {
                   child: _StatCard(
                     icon: Icons.campaign,
                     label: 'Announcements',
-                    value: '2',
+                    value: '${announcementService.totalCount}',
                     color: Colors.pink,
                   ),
                 ),
