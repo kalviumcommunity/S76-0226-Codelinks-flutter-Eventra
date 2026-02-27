@@ -3,6 +3,7 @@ import '../../shared/widgets/custom_button.dart';
 import '../../shared/widgets/custom_textfield.dart';
 import '../../core/models/user_model.dart';
 import '../../core/services/auth_service.dart';
+import '../../main.dart' show isFirebaseInitialized;
 import '../events/main_navigation_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -37,12 +38,14 @@ class _SignupScreenState extends State<SignupScreen> {
     });
 
     try {
-      // Create user using Firebase Auth
-      UserCredential userCredential = await FirebaseAuth.instance
-          .createUserWithEmailAndPassword(email: email, password: password);
+      if (isFirebaseInitialized) {
+        // Create user using Firebase Auth
+        UserCredential userCredential = await FirebaseAuth.instance
+            .createUserWithEmailAndPassword(email: email, password: password);
 
-      // Update the display name
-      await userCredential.user?.updateDisplayName(name);
+        // Update the display name
+        await userCredential.user?.updateDisplayName(name);
+      }
 
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(

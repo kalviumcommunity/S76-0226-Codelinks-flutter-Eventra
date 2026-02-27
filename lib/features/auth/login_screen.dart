@@ -4,6 +4,7 @@ import '../../shared/widgets/custom_button.dart';
 import '../../shared/widgets/custom_textfield.dart';
 import '../../core/models/user_model.dart';
 import '../../core/services/auth_service.dart';
+import '../../main.dart' show isFirebaseInitialized;
 import 'signup_screen.dart';
 import '../events/main_navigation_screen.dart';
 
@@ -36,10 +37,12 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     try {
-      await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
+      if (isFirebaseInitialized) {
+        await FirebaseAuth.instance.signInWithEmailAndPassword(
+          email: email,
+          password: password,
+        );
+      }
 
       AuthService.instance.login(
         email: email,
