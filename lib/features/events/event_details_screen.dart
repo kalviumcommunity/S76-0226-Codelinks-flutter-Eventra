@@ -6,7 +6,7 @@ import 'attendees_screen.dart';
 import 'package:intl/intl.dart';
 
 class EventDetailsScreen extends StatelessWidget {
-  final Event event;
+  final EventModel event;
 
   const EventDetailsScreen({super.key, required this.event});
 

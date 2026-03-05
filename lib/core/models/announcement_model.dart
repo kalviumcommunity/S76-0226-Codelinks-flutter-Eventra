@@ -1,13 +1,33 @@
-class Announcement {
+import 'package:cloud_firestore/cloud_firestore.dart';
+
+class AnnouncementModel {
   final String id;
   final String title;
   final String message;
-  final DateTime date;
+  final DateTime createdAt;
 
-  Announcement({
+  AnnouncementModel({
     required this.id,
     required this.title,
     required this.message,
-    required this.date,
+    required this.createdAt,
   });
+
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'title': title,
+      'message': message,
+      'createdAt': Timestamp.fromDate(createdAt),
+    };
+  }
+
+  factory AnnouncementModel.fromMap(Map<String, dynamic> map) {
+    return AnnouncementModel(
+      id: map['id'] ?? '',
+      title: map['title'] ?? '',
+      message: map['message'] ?? '',
+      createdAt: (map['createdAt'] as Timestamp).toDate(),
+    );
+  }
 }

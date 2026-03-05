@@ -6,9 +6,9 @@ class AuthService {
   AuthService._();
   static final AuthService instance = AuthService._();
 
-  User? _currentUser;
+  UserModel? _currentUser;
 
-  User? get currentUser => _currentUser;
+  UserModel? get currentUser => _currentUser;
   bool get isLoggedIn => _currentUser != null;
   bool get isAdmin => _currentUser?.role == UserRole.admin;
 
@@ -19,11 +19,12 @@ class AuthService {
     required String password,
     required UserRole role,
   }) {
-    _currentUser = User(
+    _currentUser = UserModel(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       name: role == UserRole.admin ? 'Admin User' : 'Student User',
       email: email.isNotEmpty ? email : 'user@college.edu',
       role: role,
+      createdAt: DateTime.now(),
     );
   }
 
@@ -34,11 +35,12 @@ class AuthService {
     required String password,
     required UserRole role,
   }) {
-    _currentUser = User(
+    _currentUser = UserModel(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       name: name.isNotEmpty ? name : 'New User',
       email: email.isNotEmpty ? email : 'user@college.edu',
       role: role,
+      createdAt: DateTime.now(),
     );
   }
 

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../core/services/auth_service.dart';
+import '../../core/models/announcement_model.dart';
+import '../../core/services/database/firestore_service.dart';
 
 class AnnouncementsScreen extends StatefulWidget {
   const AnnouncementsScreen({super.key});
@@ -10,33 +12,36 @@ class AnnouncementsScreen extends StatefulWidget {
 }
 
 class _AnnouncementsScreenState extends State<AnnouncementsScreen> {
-  final List<Map<String, dynamic>> _announcements = [
-    {
-      'title': 'New Workshop Added!',
-      'message':
-          'A Flutter Advanced workshop has been added to the Tech Symposium list.',
-      'date': DateTime.now().subtract(const Duration(hours: 2)),
-    },
-    {
-      'title': 'Venue Change',
-      'message':
-          'The Cultural Night will now be held at the Main Auditorium instead of the OAT.',
-      'date': DateTime.now().subtract(const Duration(days: 1)),
-    },
-  ];
+  final FirestoreService _firestoreService = FirestoreService();
+
+  final TextEditingController _titleController = TextEditingController();
+  final TextEditingController _messageController = TextEditingController();
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _messageController.dispose();
+    super.dispose();
+  }
 
   void _showCreateDialog() {
+    _titleController.clear();
+    _messageController.clear();
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('New Announcement'),
-        content: const Column(
+        content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            TextField(decoration: InputDecoration(labelText: 'Title')),
-            SizedBox(height: 12),
             TextField(
-              decoration: InputDecoration(labelText: 'Message'),
+              controller: _titleController,
+              decoration: const InputDecoration(labelText: 'Title'),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _messageController,
+              decoration: const InputDecoration(labelText: 'Message'),
               maxLines: 3,
             ),
           ],
@@ -47,7 +52,34 @@ class _AnnouncementsScreenState extends State<AnnouncementsScreen> {
             child: const Text('Cancel'),
           ),
           ElevatedButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () async {
+              if (_titleController.text.isNotEmpty &&
+                  _messageController.text.isNotEmpty) {
+                final announcement = AnnouncementModel(
+                  id: '',
+                  title: _titleController.text.trim(),
+                  message: _messageController.text.trim(),
+                  createdAt: DateTime.now(),
+                );
+
+                try {
+                  await _firestoreService.createAnnouncement(announcement);
+                  if (context.mounted) {
+                    Navigator.pop(context);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                          content: Text('Announcement posted successfully!')),
+                    );
+                  }
+                } catch (e) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Error adding announcement: $e')),
+                    );
+                  }
+                }
+              }
+            },
             child: const Text('Post'),
           ),
         ],
@@ -61,45 +93,65 @@ class _AnnouncementsScreenState extends State<AnnouncementsScreen> {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Announcements')),
-      body: ListView.builder(
-        padding: const EdgeInsets.all(16),
-        itemCount: _announcements.length,
-        itemBuilder: (context, index) {
-          final ann = _announcements[index];
-          return Card(
-            margin: const EdgeInsets.only(bottom: 16),
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      body: StreamBuilder<List<AnnouncementModel>>(
+        stream: _firestoreService.getAnnouncements(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          }
+
+          final announcements = snapshot.data ?? [];
+
+          if (announcements.isEmpty) {
+            return const Center(child: Text('No announcements yet.'));
+          }
+
+          return ListView.builder(
+            padding: const EdgeInsets.all(16),
+            itemCount: announcements.length,
+            itemBuilder: (context, index) {
+              final ann = announcements[index];
+              return Card(
+                margin: const EdgeInsets.only(bottom: 16),
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        ann['title'],
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 18,
-                        ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              ann.title,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 18,
+                              ),
+                            ),
+                          ),
+                          Text(
+                            DateFormat('MMM dd').format(ann.createdAt),
+                            style: const TextStyle(
+                              color: Colors.grey,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
                       ),
+                      const SizedBox(height: 8),
                       Text(
-                        DateFormat('MMM dd').format(ann['date']),
-                        style: const TextStyle(
-                          color: Colors.grey,
-                          fontSize: 12,
-                        ),
+                        ann.message,
+                        style: TextStyle(color: Colors.grey[800], height: 1.4),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    ann['message'],
-                    style: TextStyle(color: Colors.grey[800], height: 1.4),
-                  ),
-                ],
-              ),
-            ),
+                ),
+              );
+            },
           );
         },
       ),
