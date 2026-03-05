@@ -1,21 +1,21 @@
 {
   "project_info": {
-    "project_number": "758087066623",
-    "project_id": "chat-bot-38c8e",
-    "storage_bucket": "chat-bot-38c8e.firebasestorage.app"
+    "project_number": "514261059760",
+    "project_id": "eventra-flutter-847d0",
+    "storage_bucket": "eventra-flutter-847d0.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:758087066623:android:4fb254baf2a8fd3089fdca",
+        "mobilesdk_app_id": "1:514261059760:android:2e1bc73fd7c45fe0f21375",
         "android_client_info": {
-          "package_name": "com.example.first_app"
+          "package_name": "com.android.application"
         }
       },
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyBgiwBDcNgRwGGySRJTExXqXprFII0DiMg"
+          "current_key": "AIzaSyB299LLMSv9S7Si_-LcjFGaEBb3VvaAW_Q"
         }
       ],
       "services": {
