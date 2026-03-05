@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../../core/services/auth_service.dart';
+import '../../main.dart' show isFirebaseInitialized;
 import '../auth/login_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
@@ -77,8 +79,12 @@ class ProfileScreen extends StatelessWidget {
             ),
             const SizedBox(height: 48),
             ListTile(
-              onTap: () {
+              onTap: () async {
+                if (isFirebaseInitialized) {
+                  await FirebaseAuth.instance.signOut();
+                }
                 AuthService.instance.logout();
+                if (!context.mounted) return;
                 Navigator.pushAndRemoveUntil(
                   context,
                   MaterialPageRoute(builder: (context) => const LoginScreen()),

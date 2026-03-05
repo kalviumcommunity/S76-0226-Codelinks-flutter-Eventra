@@ -1,19 +1,87 @@
 import 'package:flutter/material.dart';
 import '../../core/models/event_model.dart';
 import '../../core/services/auth_service.dart';
+import '../../core/services/event_service.dart';
 import '../../shared/widgets/custom_button.dart';
 import 'attendees_screen.dart';
 import 'package:intl/intl.dart';
 
-class EventDetailsScreen extends StatelessWidget {
+class EventDetailsScreen extends StatefulWidget {
   final Event event;
 
   const EventDetailsScreen({super.key, required this.event});
 
   @override
+  State<EventDetailsScreen> createState() => _EventDetailsScreenState();
+}
+
+class _EventDetailsScreenState extends State<EventDetailsScreen> {
+  late bool _isRegistered;
+
+  @override
+  void initState() {
+    super.initState();
+    final userId = AuthService.instance.currentUser?.id ?? '';
+    _isRegistered = widget.event.registeredUsers.contains(userId);
+  }
+
+  Future<void> _toggleRegistration() async {
+    final userId = AuthService.instance.currentUser?.id ?? 'anon';
+    try {
+      if (_isRegistered) {
+        await EventService.instance.unregisterFromEvent(widget.event.id, userId);
+        if (!mounted) return;
+        setState(() => _isRegistered = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Registration cancelled')),
+        );
+      } else {
+        await EventService.instance.registerForEvent(widget.event.id, userId);
+        if (!mounted) return;
+        setState(() => _isRegistered = true);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Registered successfully!')),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $e')),
+      );
+    }
+  }
+
+  Future<void> _cancelEvent() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Cancel Event'),
+        content: const Text('Are you sure you want to cancel this event? This cannot be undone.'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('No')),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Yes, Cancel'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      await EventService.instance.deleteEvent(widget.event.id);
+      if (!mounted) return;
+      Navigator.pop(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Event cancelled')),
+      );
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    // Role from AuthService
     final bool isAdmin = AuthService.instance.isAdmin;
+    final event = widget.event;
 
     return Scaffold(
       body: CustomScrollView(
@@ -67,7 +135,9 @@ class EventDetailsScreen extends StatelessWidget {
                     icon: Icons.people_outline,
                     title:
                         '${event.registeredCount} / ${event.maxParticipants} Joined',
-                    subtitle: 'Limited slots available',
+                    subtitle: event.registeredCount >= event.maxParticipants
+                        ? 'Event is full'
+                        : 'Slots available',
                   ),
                   const SizedBox(height: 24),
                   const Text(
@@ -80,29 +150,30 @@ class EventDetailsScreen extends StatelessWidget {
                     style: TextStyle(color: Colors.grey[700], height: 1.5),
                   ),
                   const SizedBox(height: 24),
-                  const Text(
-                    'Schedule',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 12),
-                  // TODO: Map schedule to widgets
-                  ...event.schedule.map(
-                    (item) => Padding(
-                      padding: const EdgeInsets.only(bottom: 8.0),
-                      child: Row(
-                        children: [
-                          const Icon(
-                            Icons.check_circle_outline,
-                            size: 16,
-                            color: Colors.indigo,
-                          ),
-                          const SizedBox(width: 8),
-                          Text(item),
-                        ],
+                  if (event.schedule.isNotEmpty) ...[
+                    const Text(
+                      'Schedule',
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 12),
+                    ...event.schedule.map(
+                      (item) => Padding(
+                        padding: const EdgeInsets.only(bottom: 8.0),
+                        child: Row(
+                          children: [
+                            const Icon(
+                              Icons.check_circle_outline,
+                              size: 16,
+                              color: Colors.indigo,
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(child: Text(item)),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 32),
+                    const SizedBox(height: 32),
+                  ],
                   Row(
                     children: [
                       Expanded(
@@ -123,13 +194,17 @@ class EventDetailsScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 12),
                   if (!isAdmin)
-                    CustomButton(text: 'Register Now', onPressed: () {}),
+                    CustomButton(
+                      text: _isRegistered ? 'Cancel Registration' : 'Register Now',
+                      color: _isRegistered ? Colors.red : null,
+                      onPressed: _toggleRegistration,
+                    ),
                   if (isAdmin)
                     Row(
                       children: [
                         Expanded(
                           child: OutlinedButton(
-                            onPressed: () {},
+                            onPressed: _cancelEvent,
                             style: OutlinedButton.styleFrom(
                               foregroundColor: Colors.red,
                               side: const BorderSide(color: Colors.red),
