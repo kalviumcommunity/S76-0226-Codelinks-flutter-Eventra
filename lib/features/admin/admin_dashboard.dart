@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../core/services/auth_service.dart';
+import '../../core/services/event_service.dart';
+import '../../core/services/announcement_service.dart';
 import '../events/create_event_screen.dart';
 import '../announcements/announcements_screen.dart';
 
@@ -9,6 +11,8 @@ class AdminDashboard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final user = AuthService.instance.currentUser;
+    final eventService = EventService.instance;
+    final announcementService = AnnouncementService.instance;
 
     return Scaffold(
       appBar: AppBar(
@@ -105,44 +109,44 @@ class AdminDashboard extends StatelessWidget {
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
-            Row(
+            const Row(
               children: [
                 Expanded(
                   child: _StatCard(
                     icon: Icons.event,
                     label: 'Total Events',
-                    value: '3',
+                    value: '${eventService.totalEvents}',
                     color: Colors.indigo,
                   ),
                 ),
-                const SizedBox(width: 12),
+                SizedBox(width: 12),
                 Expanded(
                   child: _StatCard(
                     icon: Icons.people,
                     label: 'Registrations',
-                    value: '285',
+                    value: '${eventService.totalRegistrations}',
                     color: Colors.teal,
                   ),
                 ),
               ],
             ),
             const SizedBox(height: 12),
-            Row(
+            const Row(
               children: [
                 Expanded(
                   child: _StatCard(
                     icon: Icons.upcoming,
                     label: 'Upcoming',
-                    value: '2',
+                    value: '${eventService.upcomingCount}',
                     color: Colors.orange,
                   ),
                 ),
-                const SizedBox(width: 12),
+                SizedBox(width: 12),
                 Expanded(
                   child: _StatCard(
                     icon: Icons.campaign,
                     label: 'Announcements',
-                    value: '2',
+                    value: '${announcementService.totalCount}',
                     color: Colors.pink,
                   ),
                 ),
@@ -193,22 +197,22 @@ class AdminDashboard extends StatelessWidget {
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
-            _ActivityItem(
+            const _ActivityItem(
               icon: Icons.event_available,
               title: 'Tech Symposium 2026 created',
               time: '2 hours ago',
             ),
-            _ActivityItem(
+            const _ActivityItem(
               icon: Icons.person_add,
               title: '5 new registrations for Cultural Night',
               time: '4 hours ago',
             ),
-            _ActivityItem(
+            const _ActivityItem(
               icon: Icons.campaign,
               title: 'Venue change announcement posted',
               time: '1 day ago',
             ),
-            _ActivityItem(
+            const _ActivityItem(
               icon: Icons.edit,
               title: 'Tech Night event updated',
               time: '2 days ago',

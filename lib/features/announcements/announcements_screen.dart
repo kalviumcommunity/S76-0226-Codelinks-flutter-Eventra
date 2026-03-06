@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import '../../core/models/announcement_model.dart';
 import '../../core/services/auth_service.dart';
+import '../../core/services/announcement_service.dart';
 
 class AnnouncementsScreen extends StatefulWidget {
   const AnnouncementsScreen({super.key});
@@ -10,33 +12,28 @@ class AnnouncementsScreen extends StatefulWidget {
 }
 
 class _AnnouncementsScreenState extends State<AnnouncementsScreen> {
-  final List<Map<String, dynamic>> _announcements = [
-    {
-      'title': 'New Workshop Added!',
-      'message':
-          'A Flutter Advanced workshop has been added to the Tech Symposium list.',
-      'date': DateTime.now().subtract(const Duration(hours: 2)),
-    },
-    {
-      'title': 'Venue Change',
-      'message':
-          'The Cultural Night will now be held at the Main Auditorium instead of the OAT.',
-      'date': DateTime.now().subtract(const Duration(days: 1)),
-    },
-  ];
+  final _titleController = TextEditingController();
+  final _messageController = TextEditingController();
 
   void _showCreateDialog() {
+    _titleController.clear();
+    _messageController.clear();
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('New Announcement'),
-        content: const Column(
+        content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            TextField(decoration: InputDecoration(labelText: 'Title')),
-            SizedBox(height: 12),
             TextField(
-              decoration: InputDecoration(labelText: 'Message'),
+              controller: _titleController,
+              decoration: const InputDecoration(labelText: 'Title'),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _messageController,
+              decoration: const InputDecoration(labelText: 'Message'),
               maxLines: 3,
             ),
           ],
@@ -47,7 +44,25 @@ class _AnnouncementsScreenState extends State<AnnouncementsScreen> {
             child: const Text('Cancel'),
           ),
           ElevatedButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () {
+              final title = _titleController.text.trim();
+              final message = _messageController.text.trim();
+              if (title.isEmpty || message.isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Please fill all fields')),
+                );
+                return;
+              }
+              AnnouncementService.instance.addAnnouncement(
+                title: title,
+                message: message,
+              );
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Announcement posted!')),
+              );
+              setState(() {}); // Refresh local view
+            },
             child: const Text('Post'),
           ),
         ],
@@ -61,45 +76,89 @@ class _AnnouncementsScreenState extends State<AnnouncementsScreen> {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Announcements')),
-      body: ListView.builder(
-        padding: const EdgeInsets.all(16),
-        itemCount: _announcements.length,
-        itemBuilder: (context, index) {
-          final ann = _announcements[index];
-          return Card(
-            margin: const EdgeInsets.only(bottom: 16),
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
+      body: StreamBuilder<List<Announcement>>(
+        stream: AnnouncementService.instance.getAnnouncementsStream(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          final announcements = snapshot.data ?? [];
+
+          if (announcements.isEmpty) {
+            return Center(
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        ann['title'],
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 18,
-                        ),
-                      ),
-                      Text(
-                        DateFormat('MMM dd').format(ann['date']),
-                        style: const TextStyle(
-                          color: Colors.grey,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
+                  Icon(Icons.campaign_outlined, size: 80, color: Colors.grey[300]),
+                  const SizedBox(height: 16),
                   Text(
-                    ann['message'],
-                    style: TextStyle(color: Colors.grey[800], height: 1.4),
+                    'No announcements yet',
+                    style: TextStyle(fontSize: 18, color: Colors.grey[600]),
                   ),
                 ],
               ),
-            ),
+            );
+          }
+
+          return ListView.builder(
+            padding: const EdgeInsets.all(16),
+            itemCount: announcements.length,
+            itemBuilder: (context, index) {
+              final ann = announcements[index];
+              return Card(
+                margin: const EdgeInsets.only(bottom: 16),
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              ann.title,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 18,
+                              ),
+                            ),
+                          ),
+                          Text(
+                            DateFormat('MMM dd').format(ann.date),
+                            style: const TextStyle(
+                              color: Colors.grey,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        ann.message,
+                        style: TextStyle(color: Colors.grey[800], height: 1.4),
+                      ),
+                      if (isAdmin) ...[
+                        const SizedBox(height: 8),
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: IconButton(
+                            icon: const Icon(Icons.delete_outline,
+                                color: Colors.red, size: 20),
+                            onPressed: () {
+                              AnnouncementService.instance
+                                  .deleteAnnouncement(ann.id);
+                              setState(() {});
+                            },
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              );
+            },
           );
         },
       ),

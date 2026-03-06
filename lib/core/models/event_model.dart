@@ -8,6 +8,7 @@ class Event {
   final int maxParticipants;
   final List<String> schedule;
   final String imageUrl;
+  final List<String> registeredUsers;
 
   Event({
     required this.id,
@@ -19,5 +20,6 @@ class Event {
     required this.maxParticipants,
     required this.schedule,
     required this.imageUrl,
+    this.registeredUsers = const [],
   });
 }

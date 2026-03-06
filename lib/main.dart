@@ -1,3 +1,5 @@
+import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'core/theme/app_theme.dart';
 import 'features/auth/login_screen.dart';
@@ -5,11 +7,24 @@ import 'package:firebase_core/firebase_core.dart';
 import 'core/constants/app_constants.dart';
 import 'firebase_options.dart';
 
+/// Global flag indicating whether Firebase was successfully initialized.
+bool isFirebaseInitialized = false;
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+    isFirebaseInitialized = true;
+  } catch (e) {
+    debugPrint('Firebase initialization failed: $e');
+    isFirebaseInitialized = false;
+    if (!kIsWeb && Platform.isLinux) {
+      debugPrint('Firebase is not supported on Linux desktop. '
+          'Run with "flutter run -d chrome" for full Firebase support.');
+    }
+  }
   runApp(const EventraApp());
 }
 
