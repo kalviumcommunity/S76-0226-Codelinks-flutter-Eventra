@@ -3,7 +3,7 @@ import '../../core/models/event_model.dart';
 import 'package:intl/intl.dart';
 
 class EventCard extends StatelessWidget {
-  final Event event;
+  final EventModel event;
   final VoidCallback onTap;
   final VoidCallback onRegister;
 

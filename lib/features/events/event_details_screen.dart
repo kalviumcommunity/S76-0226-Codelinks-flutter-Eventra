@@ -6,6 +6,9 @@ import '../../shared/widgets/custom_button.dart';
 import 'attendees_screen.dart';
 import 'package:intl/intl.dart';
 
+class EventDetailsScreen extends StatelessWidget {
+  final EventModel event;
+
 class EventDetailsScreen extends StatefulWidget {
   final Event event;
 

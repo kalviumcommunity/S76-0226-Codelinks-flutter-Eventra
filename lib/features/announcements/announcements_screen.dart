@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../core/models/announcement_model.dart';
 import '../../core/services/auth_service.dart';
+import '../../core/models/announcement_model.dart';
+import '../../core/services/database/firestore_service.dart';
 import '../../core/services/announcement_service.dart';
 
 class AnnouncementsScreen extends StatefulWidget {
@@ -12,6 +14,17 @@ class AnnouncementsScreen extends StatefulWidget {
 }
 
 class _AnnouncementsScreenState extends State<AnnouncementsScreen> {
+  final FirestoreService _firestoreService = FirestoreService();
+
+  final TextEditingController _titleController = TextEditingController();
+  final TextEditingController _messageController = TextEditingController();
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _messageController.dispose();
+    super.dispose();
+  }
   final _titleController = TextEditingController();
   final _messageController = TextEditingController();
 
@@ -44,6 +57,34 @@ class _AnnouncementsScreenState extends State<AnnouncementsScreen> {
             child: const Text('Cancel'),
           ),
           ElevatedButton(
+            onPressed: () async {
+              if (_titleController.text.isNotEmpty &&
+                  _messageController.text.isNotEmpty) {
+                final announcement = AnnouncementModel(
+                  id: '',
+                  title: _titleController.text.trim(),
+                  message: _messageController.text.trim(),
+                  createdAt: DateTime.now(),
+                );
+
+                try {
+                  await _firestoreService.createAnnouncement(announcement);
+                  if (context.mounted) {
+                    Navigator.pop(context);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                          content: Text('Announcement posted successfully!')),
+                    );
+                  }
+                } catch (e) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Error adding announcement: $e')),
+                    );
+                  }
+                }
+              }
+
             onPressed: () {
               final title = _titleController.text.trim();
               final message = _messageController.text.trim();
@@ -76,16 +117,23 @@ class _AnnouncementsScreenState extends State<AnnouncementsScreen> {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Announcements')),
+      body: StreamBuilder<List<AnnouncementModel>>(
+        stream: _firestoreService.getAnnouncements(),
       body: StreamBuilder<List<Announcement>>(
         stream: AnnouncementService.instance.getAnnouncementsStream(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
+          if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          }
+
 
           final announcements = snapshot.data ?? [];
 
           if (announcements.isEmpty) {
+            return const Center(child: Text('No announcements yet.'));
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -126,6 +174,8 @@ class _AnnouncementsScreenState extends State<AnnouncementsScreen> {
                             ),
                           ),
                           Text(
+                            DateFormat('MMM dd').format(ann.createdAt),
+
                             DateFormat('MMM dd').format(ann.date),
                             style: const TextStyle(
                               color: Colors.grey,
