@@ -42,47 +42,47 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions web = FirebaseOptions(
     apiKey: 'AIzaSyBmpD9km_AO9FsciPoGBF8S3dOh4gAdebw',
-    appId: '1:758087066623:web:c2bd259deea0936a89fdca',
-    messagingSenderId: '758087066623',
-    projectId: 'chat-bot-38c8e',
-    authDomain: 'chat-bot-38c8e.firebaseapp.com',
-    storageBucket: 'chat-bot-38c8e.firebasestorage.app',
+    appId: '1:514261059760:web:c2bd259deea0936a89fdca',
+    messagingSenderId: '514261059760',
+    projectId: 'eventra-flutter-847d0',
+    authDomain: 'eventra-flutter-847d0.firebaseapp.com',
+    storageBucket: 'eventra-flutter-847d0.firebasestorage.app',
     measurementId: 'G-8H6P14PT2E',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyBgiwBDcNgRwGGySRJTExXqXprFII0DiMg',
-    appId: '1:758087066623:android:4fb254baf2a8fd3089fdca',
-    messagingSenderId: '758087066623',
-    projectId: 'chat-bot-38c8e',
-    storageBucket: 'chat-bot-38c8e.firebasestorage.app',
+    apiKey: 'AIzaSyB299LLMSv9S7Si_-LcjFGaEBb3VvaAW_Q',
+    appId: '1:514261059760:android:2e1bc73fd7c45fe0f21375',
+    messagingSenderId: '514261059760',
+    projectId: 'eventra-flutter-847d0',
+    storageBucket: 'eventra-flutter-847d0.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyCFNjISJy-UiLOVNNCntn1c5SfH3LCD_-4',
-    appId: '1:758087066623:ios:d4974efe3988ffa489fdca',
-    messagingSenderId: '758087066623',
-    projectId: 'chat-bot-38c8e',
-    storageBucket: 'chat-bot-38c8e.firebasestorage.app',
+    appId: '1:514261059760:ios:d4974efe3988ffa489fdca',
+    messagingSenderId: '514261059760',
+    projectId: 'eventra-flutter-847d0',
+    storageBucket: 'eventra-flutter-847d0.firebasestorage.app',
     iosBundleId: 'com.example.firstApp',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
     apiKey: 'AIzaSyCFNjISJy-UiLOVNNCntn1c5SfH3LCD_-4',
-    appId: '1:758087066623:ios:d4974efe3988ffa489fdca',
-    messagingSenderId: '758087066623',
-    projectId: 'chat-bot-38c8e',
-    storageBucket: 'chat-bot-38c8e.firebasestorage.app',
+    appId: '1:514261059760:ios:d4974efe3988ffa489fdca',
+    messagingSenderId: '514261059760',
+    projectId: 'eventra-flutter-847d0',
+    storageBucket: 'eventra-flutter-847d0.firebasestorage.app',
     iosBundleId: 'com.example.firstApp',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
     apiKey: 'AIzaSyBBLmmesVxiXjv2xXKbXxmqd0GLIYiPLSI',
-    appId: '1:758087066623:web:d278a664fa13167f89fdca',
-    messagingSenderId: '758087066623',
-    projectId: 'chat-bot-38c8e',
-    authDomain: 'chat-bot-38c8e.firebaseapp.com',
-    storageBucket: 'chat-bot-38c8e.firebasestorage.app',
+    appId: '1:514261059760:web:d278a664fa13167f89fdca',
+    messagingSenderId: '514261059760',
+    projectId: 'eventra-flutter-847d0',
+    authDomain: 'eventra-flutter-847d0.firebaseapp.com',
+    storageBucket: 'eventra-flutter-847d0.firebasestorage.app',
     measurementId: 'G-RYPRWNKMC0',
   );
 }
